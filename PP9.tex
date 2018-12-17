@@ -1,0 +1,300 @@
+%!TEX encoding = UTF-8 Unicode
+%==================================================
+%      PREAMBOLO e DICHIARAZIONI INIZIALI
+%==================================================
+\documentclass[10pt,oneside,a4paper]{article}
+
+\usepackage[utf8]{inputenc} 
+\usepackage[italian]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{siunitx} %Inserisce automaticamente i dati con le unità  di misura correttamente formattate del SI (utilizzo: \SI{0.82}{m^2}, in generale \SI{misura con il punto decimale}{unità  di misura})
+\sisetup{output-decimal-marker = {.}, separate-uncertainty = true, input-uncertainty-signs = \pm, detect-weight=true, detect-family=true} %per usare SI con il punto decimale
+\usepackage{listings} %Per citare codice informatico formattandolo correttamente
+\usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd,graphicx,mathtools}
+\usepackage[makeroom]{cancel}
+\newcommand{\abs}[1]{\left\lvert\,#1\,\right\rvert}
+\usepackage{geometry}
+\usepackage{epigraph}
+\usepackage{booktabs}	%tabelle migliorate
+\usepackage{tablefootnote}	%note a piè di pagina in tabella
+\usepackage{threeparttable} %tabella con note a piè di tabella
+\usepackage{caption}	%descrizione per figure
+\usepackage{dblfnote}
+\captionsetup{tableposition=top,figureposition=bottom,font=small} %setup descrizione
+\usepackage{float}
+\usepackage{esvect} %vettori
+\usepackage{longtable} %tabelle lunghe
+\usepackage[dvipsnames]{xcolor}
+\definecolor{sepia}{HTML}{80002A}
+\usepackage[colorlinks=true, citecolor=black, linkcolor=sepia, urlcolor=black]{hyperref}
+\usepackage{mathrsfs}
+\usepackage{circuitikz}
+\tikzset{
+  font={\fontsize{7pt}{12}\selectfont}}
+\ctikzset{bipoles/resistor/height=0.2}
+\ctikzset{bipoles/resistor/width=0.4}
+\ctikzset{bipoles/diode/height=0.3}
+\ctikzset{bipoles/diode/width=0.3}
+\ctikzset{tripoles/american nand port/height=0.7}
+\ctikzset{tripoles/american nand port/width=0.8}
+\usepackage{enumitem} %Liste senza spazi verticali
+\setlist{noitemsep}
+\usepackage{amsmath}
+
+
+\interfootnotelinepenalty=10000
+
+
+\usepackage{multicol}
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+
+\newcommand{\var}{\operatorname{var}}
+\newcommand{\cov}{\operatorname{cov}}
+
+
+\usepackage{listings} %Per inserire codice
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+
+\definecolor{color1}{RGB}{90,0,0} % Color of the article title and sections
+\definecolor{color2}{RGB}{0,20,50} % Color of the boxes behind the abstract and headings
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+
+%==================================================
+%                  PRIMA PAGINA
+%==================================================
+
+\title{\textsc{\textbf{Esercitazione 9}: DFT con Arduino}}
+\author{\small{G. Galbato Muscio} \and \small{L. Gravina} \and \small{L. Graziotto}}
+\date{18 Dicembre 2018}
+
+\begin{document}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.5, trim={2.8cm 8.9cm 0 9cm}, clip]{logo.png}
+	\end{figure}
+	\maketitle
+	\begin{center} 
+		\fbox{{\fontsize{12pt}{8mm}\textsc{Gruppo 11}}} \\
+	\end{center}
+\hrule
+\vspace{0.5cm}
+\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+Si utilizza il microcontrollore Arduino come hardware per il campionamento di segnali analogici e il software Processing per la loro analisi in frequenza. Si studiano segnali periodici e segnali impulsivi in presenza e assenza di rumore.
+\end{abstract}
+\vspace{4cm}
+\tableofcontents %Indice
+\newpage
+
+
+\pagebreak
+
+
+\begin{multicols}{2}
+%==================================================
+%             APPARATO STRUMENTALE
+%==================================================
+\section{Apparato strumentale}
+Si vuole campionare il segnale analogico in ingresso utilizzando la più alta frequenza possibile: le misure vengono dunque memorizzate da Arduino in un buffer nella memoria e solo alla fine vengono trasmesse in seriale, in tal modo si riduce il tempo per effettuare la singola misura\footnote{La trasmissione seriale impiega un tempo non trascurabile per essere completata.}, riducendolo approssimativamente a quello necessario per completare la funzione \texttt{analogRead()}, pari a circa $t_\text{A} = \SI{111}{\micro\second}$, la massima frequenza di campionamento è dunque $f_\text{max} = t_\text{A}^{-1} = \SI{9.0}{\kilo\hertz}$. Considerando la memoria dell'Arduino possono essere memorizzati fino a $N = 800$ valori, dunque campionando alla frequenza massima la durata del campionamento è di circa $t_\text{camp} = N/f_\text{max} = \SI{8.89}{\milli\second}$.
+
+Per evitare fenomeni di \emph{aliasing}, deve essere verificata la seguente condizione sulla frequenza del segnale in ingresso
+\begin{equation}\label{eq:Nyquist}
+	f_\text{in} \leq \frac{f_\text{max}}{2} = \SI{4.5}{\kilo\hertz} \equiv f_\text{Nyquist}.
+\end{equation}
+
+
+%==================================================
+%             SEGNALE ANALOGICO SENZA RUMORE
+%==================================================
+\section{Segnale analogico in assenza di rumore}
+Si campionano e si studiano in frequenza dei segnali analogici prodotti dal generatore di funzioni in assenza di rumore artificiale.
+\subsection{Segnale sinusoidale}
+Si campiona digitalmente un segnale sinusoidale analogico in ingresso a frequenze $f_1 = \SI{111 \pm 111}{\hertz}, \; f_2 = \SI{111 \pm 111}{\kilo\hertz}$ e infine $f_3 = \SI{111 \pm 111}{\kilo\hertz}$, quest'ultima volutamente superiore al limite dettato dalla frequenza di Nyquist (\ref{eq:Nyquist}) per poter apprezzare i fenomeni di \emph{aliasing}; le frequenze sono misurate con un oscilloscopio.
+
+Si riportano in Figura \ref{fig:sin200camp} e in Figura \ref{fig:sin200trasf} il segnale a frequenza $f_1$ campionato da Arduino e la sua trasformata di Fourier discreta, rispettivamente. Sull'asse delle ascisse sono riportate le frequenze di Fourier tenendo presente la relazione che lega la frequenza con l'indice della trasformata
+\begin{equation}\label{eq:frequenzeFourier}
+	f_\text{fourier} = k \frac{f_\text{s}}{N}
+\end{equation}
+essendo $f_\text{s}/N$ l'inverso della finestra temporale del campionamento, e dunque la minima frequenza misurabile: le altre frequenze della decomposizione saranno multipli interi della frequenza elementare.
+Nel grafico della trasformata viene inoltre riportata indicativamente la frequenza di Nyquist.
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{sin200camp.pdf}
+%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}, campionato con Arduino.}
+%	\label{fig:sin200camp}
+%	\end{center}
+%\end{Figure}
+%
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{sin200trasf.pdf}
+%	\captionof{figure}{Trasformata di Fourier discreta di un segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}.}
+%	\label{fig:sin200trasf}
+%	\end{center}
+%\end{Figure}
+
+Come da aspettativa teorica, la trasformata ha un picco in corrispondenza della frequenza del segnale in ingresso, essendo questo sinusoidale ed essendo lontani dalla frequenza di Nyquist.
+
+Analogamente, si riportano in Figura \ref{fig:sin42camp}, \ref{fig:sin42trasf}, \ref{fig:sin6camp} e \ref{fig:sin6trasf} i grafici ottenuti campionando due segnali di frequenza $f_2$ e $f_3$. L'ultimo è a frequenza superiore a quella di Nyquist, la frequenza apparente è coerente con quanto previsto teoricamente, ovvero
+\begin{equation}\label{eq:frequenzaAlias}
+	f_\text{alias} = 2f_\text{Nyquist} - f_\text{in}.
+\end{equation}
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{sin42camp.pdf}
+%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}, campionato con Arduino.}
+%	\label{fig:sin42camp}
+%	\end{center}
+%\end{Figure}
+%
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{sin42rasf.pdf}
+%	\captionof{figure}{Trasformata di Fourier discreta di un segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}.}
+%	\label{fig:sin42trasf}
+%	\end{center}
+%\end{Figure}
+%
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{sin6camp.pdf}
+%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}, campionato con Arduino.}
+%	\label{fig:sin6camp}
+%	\end{center}
+%\end{Figure}
+%
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{sin6trasf.pdf}
+%	\captionof{figure}{Trasformata di Fourier discreta di un segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}.}
+%	\label{fig:sin6trasf}
+%	\end{center}
+%\end{Figure}
+
+\subsection{Onda quadra}
+
+%==================================================
+%             STUDIO DEL RUMORE
+%==================================================
+\section{Studio del rumore}
+\begin{center}
+\begin{circuitikz}
+\draw (0,0) node[op amp] (opamp) {}
+(opamp.+) to[R=$R_1'$] ++(-2,0) node[circ] {} node[left] {$v_\text{2}$}
+(opamp.-) to[short] ++(0, 1.25) to[R = $R_2$] ++(2,0) -| (opamp.out)
+(opamp.-) node[circ] {}
+(opamp.+) node[circ] {}
+(opamp.-) to[R=$R_1$] ++(-2,0) node[circ] {} node[left] {$v_1$}
+(opamp.out) to[short, *-*] ++(0.5,0) node[right] {$v_\text{o}$}
+(opamp.+) to[R=$R_2'$] ++(0,-2) node[ground] {}
+;\end{circuitikz}
+\end{center}
+
+\begin{center}
+\begin{circuitikz}
+\draw (0,0) node[op amp] (opamp) {}
+(opamp.out) to[short, *-*] ++(0.5,0) node[right] {$V_\text{o}$}
+(opamp.-) to[short] ++(-0.25,0) to[R=$R$] ++(-1.5,0) node[ground] {}
+(opamp.-) -| ++(0,1) to[R = $R'$] ++(2,0) -| (opamp.out)
+(opamp.-) node[circ] {}
+(opamp.+) to[R=$R_A$] ++(-2,0) node[circ] {} node[left]{$V_A$}
+(opamp.+) node[circ] {}
+(opamp.+) to[short] ++(0,-1) to[R=$R_B$] ++(-2,0) node[circ] {} node[left]{$V_B$}
+;\end{circuitikz}
+\end{center}
+
+
+%==================================================
+%             SEGNALE IMPULSIVO
+%==================================================
+\section{Studio di un segnale impulsivo}
+\subsection{Impulso in assenza di rumore}
+\subsection{Impulso in presenza di rumore}
+
+
+\end{multicols}
+\newpage
+\section{Appendice}
+
+
+%ESEMPIO DI CODICE
+%\begin{lstlisting}[style=CStyle, caption={Codice per la misura dei tempi di esecuzione della moltiplicazione}, label=lst:moltiplicazione]
+%#define MAX 10000
+%
+%int p, q;
+%long unsigned t0, t1;
+%
+%void setup() {
+%	Serial.begin(9600);
+%	p=10; 
+%}
+%
+%void loop() { 
+%	Serial.print(p);
+%	t0 = micros();
+%	q = p*10;
+%	t1 = micros();
+%	p = p+1;	
+%	Serial.print(p);
+%	Serial.print(" ");
+%	Serial.println(t1-t0); //stampa il tempo
+%	while (p > MAX) { }; //il programma si arresta quando il numero supera MAX
+%	}
+%\end{lstlisting}
+
+
+%ESEMPIO DI FIGURA
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{comune.png}
+%	\captionof{figure}{Istantanea dell'oscilloscopio per l'amplificatore differenziale, misura di $A_c$}
+%	\label{fig:Ac_differenziale}
+%	\end{center}
+%\end{Figure}
+
+
+%ESEMPIO DI TABELLA
+%\begin{center}
+%\captionof{table}{Misure per la stima di $A_c$}
+%\label{tab:Ac_differenziale}
+%\begin{tabular}{c|c|c|c}
+%$f$ [\SI{}{Hz}] & $V_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $A_c = v_o / V_i$ \\
+%\hline
+%      149.5 &        3.90 &         11.3 & 2.90e-03 \\
+%      222.0 &        3.90 &         11.5 & 2.95e-03 \\
+%      281.0 &        3.90 &         11.8 & 3.03e-03 \\
+%      359.0 &        3.90 &         11.8 & 3.03e-03 \\
+%      461.0 &        3.90 &         12.2 & 3.13e-03 \\
+%\hline
+%\end{tabular}
+%\end{center}
+
+
+
+\end{document}
