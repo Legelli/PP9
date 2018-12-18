@@ -142,10 +142,14 @@ compatibile con quanto descritto precedentemente. Si ha poi la frequenza di Nyqu
 f_N = \frac{f_s}{2} = \SI{111 \pm 111}{\Hz},
 \]
 e si ricava l'intervallo tra due campioni successivi di frequenza come
-\begin{equation}\label{eq:ktof}
+\[
 \Delta f = \frac{f_s}{N} = \SI{111 \pm 111}{\Hz}.
+\]
+Da queste misure si conclude che la frequenza in funzione del numero $k$ riportato in ascissa sul grafico del modulo della trasformata è
+\begin{equation}\label{eq:ktof}
+f = k \Delta f,
 \end{equation}
-Da queste misure si conclude che la frequenza in funzione del numero $k$ riportato in ascissa sul grafico del modulo della trasformata è $f = k \Delta f$, e che l'intervallo di frequenze osservabili sperimentalmente è $[\Delta f, f_N] = [\SI{111}{\Hz}, \SI{111}{\Hz}]$. Dal grafico della trasformata si osserva, oltre al picco relativo alla frequenza $f_Q$, il simmetrico a frequenza $2f_N - f_Q$, che rappresenta la frequenza negativa dovuta alla periodicità della trasformata di Fourier discreta.
+e che l'intervallo di frequenze osservabili sperimentalmente è $[\Delta f, f_N] = [\SI{111}{\Hz}, \SI{111}{\Hz}]$. Dal grafico della trasformata si osserva, oltre al picco relativo alla frequenza $f_Q$, il simmetrico a frequenza $2f_N - f_Q$, che rappresenta la frequenza negativa dovuta alla periodicità della trasformata di Fourier discreta.
 
 %\begin{Figure}
 %	\begin{center}
@@ -246,6 +250,29 @@ Si osserva che la frequenza del segnale è compatibile con $f^\text{(exp)}$ per 
 
 
 \subsection{Onda quadra}
+Si invia al pin \texttt{A3} di Arduino un'onda quadra variabile tra $0$ e \SI{111 \pm 111}{V} a frequenza $f = \SI{111 \pm 111}{\Hz}$, misurata con l'oscilloscopio. Si effettua il campionamento della stessa (e si è scelta $f<f_N$ appositamente), e si riportano in Figura~\ref{fig:quadra} e~\ref{fig:quadraosc} la tensione in funzione del tempo e la trasformata di Fourier e uno screenshot dell'oscilloscopio. 
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Onda quadra e sua trasformata di Fourier realizzata con Arduino}
+%	\label{fig:quadra}
+%	\end{center}
+%\end{Figure}
+%
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Istantanea dell'oscilloscopio per l'onda quadra}
+%	\label{fig:quadraosc}
+%	\end{center}
+%\end{Figure}
+
+Si individuano sul grafico della trasformata i picchi relativi alle armoniche dispari dello sviluppo in serie di Fourier dell'onda quadra, che si ricorda essere
+\[
+V(t) = V_0 \sum_{n=0}^{\infty} \frac{4}{\pi(2n+1)} \sin(2\pi f t(2n+1)) 
+\]
+
 
 
 
@@ -255,18 +282,6 @@ Si osserva che la frequenza del segnale è compatibile con $f^\text{(exp)}$ per 
 %             STUDIO DEL RUMORE
 %==================================================
 \section{Studio del rumore}
-\begin{center}
-\begin{circuitikz}
-\draw (0,0) node[op amp] (opamp) {}
-(opamp.+) to[R=$R_1'$] ++(-2,0) node[circ] {} node[left] {$v_\text{2}$}
-(opamp.-) to[short] ++(0, 1.25) to[R = $R_2$] ++(2,0) -| (opamp.out)
-(opamp.-) node[circ] {}
-(opamp.+) node[circ] {}
-(opamp.-) to[R=$R_1$] ++(-2,0) node[circ] {} node[left] {$v_1$}
-(opamp.out) to[short, *-*] ++(0.5,0) node[right] {$v_\text{o}$}
-(opamp.+) to[R=$R_2'$] ++(0,-2) node[ground] {}
-;\end{circuitikz}
-\end{center}
 
 \begin{center}
 \begin{circuitikz}
