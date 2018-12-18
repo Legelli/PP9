@@ -244,7 +244,7 @@ $(\pm 3\%)$ & & $(\pm 0.3\%)$ &  & $(\pm 0.3\%)$  \\
 \hline
 0.740 &			66  & 0.732	 & 	734 & 8.14 	\\
 1.57 & 			141 & 1.56   & 659	& 7.31 \\
-3.64 & 			326 & 3.62	 & 474 	& 5.26 \\  
+3.64 & 			326 & 3.62	 & 474 	& 5.26  \\  
 6.9  &			174 & 1.93	 & 626  & 6.94 \\
 7.7  & 			116 & 1.29	 & 684  & 7.59 \\
 8.4  &			47  & 0.52	 & 753  & 8.35 \\			 
@@ -281,14 +281,17 @@ e si nota che si hanno frequenze inferiori a quella di Nyquist fino alla nona ar
 
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{rumore_analisi}
-	\captionof{figure}{Massimi dello spettro dell'onda quadra individuati dall'algoritmo}
+	\includegraphics[width=\linewidth]{rumore_analisi.pdf}
+	\captionof{figure}{Massimi dello spettro dell'onda quadra individuati dall'algoritmo, in ordinata i moduli della trasformata di Fourier si intendono moltiplicati per $10^5$}
 	\label{fig:armoniche_quadra}
 	\end{center}
 \end{Figure}
 
 
-Si interpone quindi tra il segnale di onda quadra e Arduino un filtro VCVS \emph{Butterworth} passa basso, al fine di eliminare le frequenze superiori a quella di Nyquist, in modo da ottenere nello spettro solo le armoniche fino a $(2n+1)=9$. Si riportano in Figura~\ref{fig:quadraFiltroOsc} lo screenshot dell'oscilloscopio per questa configurazione, nel quale è visibile in basso l'onda quadra in ingresso e in alto l'onda filtrata in uscita, la quale mostra la mancanza delle frequenze maggiori. In Figura~\ref{fig:quadraFiltro} sono riportati i grafici del campionamento e del modulo della trasformata ottenuti con Arduino: si osserva come solo le frequenze inferiori a quella di Nyquist sono presenti nello spettro.
+Si interpone quindi tra il segnale di onda quadra e Arduino un filtro VCVS \emph{Butterworth} passa basso, al fine di eliminare le frequenze superiori a quella di Nyquist, in modo da ottenere nello spettro solo le armoniche fino a $(2n+1)=9$. Si riporta in Figura~\ref{fig:quadraFiltroOsc} lo screenshot dell'oscilloscopio per questa configurazione, nel quale è visibile in basso l'onda quadra in ingresso e in alto l'onda filtrata in uscita, la quale mostra la mancanza delle armoniche maggiori. In Figura~\ref{fig:quadraFiltro} sono riportati i grafici del campionamento e del modulo della trasformata ottenuti con Arduino: si osserva come solo le frequenze inferiori a quella di Nyquist sono presenti nello spettro.
+Analogamente a quanto fatto precedentemente, si individuano i picchi e si riportano i risultati in Tabella \ref{tab:armoniche_quadra_filtro}: si osserva che le armoniche sono ancora compatibili con quelle teoriche e che per frequenze superiori a quella di taglio (di circa $\SI{1}{\kilo\hertz}$) i moduli della trasformata di Fourier vengono notevolmente attutiti.
+
+In Figura \ref{fig:quadraFiltro} sono visibili dei picchi in corrispondenza di frequenze inesistenti nel caso non filtrato, si ritiene che ciò sia dovuto all'amplificazione generata dal filtro: infatti l'onda quadra oscillante tra $0$ e $V_\text{max}$ è stata ottenuta aggiungendo manualmente un offset al generatore di funzioni, molto probabilmente l'onda oscillava in realtà tra un valore negativo in modulo vicino a $0$ e $V_\text{max}$, questo valore negativo è stato amplificato dal filtro e dunque l'onda risulta tagliata in maniera non più trascurabile\footnote{Perché, si ricorda, l'Arduino misura solamente tensioni positive.}, come visibile in Figura \ref{fig:quadraFiltroOsc}. Le parti orizzontali, non proprie della funzione originale, generano quelle frequenze impreviste. In tale ottica, nella tabella \ref{tab:armoniche_quadra_filtro} vengono riportati solo i massimi corrispondenti ad armoniche teoricamente corrette.
 
 \begin{Figure}
 	\begin{center}
@@ -310,15 +313,30 @@ Si interpone quindi tra il segnale di onda quadra e Arduino un filtro VCVS \emph
 \captionof{table}{Spettro dell'onda quadra, armoniche $f_n<f_N$}
 \label{tab:armoniche_quadra}
 \centering
-\begin{tabular}{c|c|c|c}
-$2n+1$ & $f^\text{(teo)}$ [\SI{}{\kilo\Hz}] & $k$ & $f^\text{(exp)}$ [\SI{}{\kilo\Hz}] \\
- & & & $(\pm 3\%)$   \\ 
+\begin{tabular}{c|c|c|c|c}
+$2n+1$ & $f^\text{(teo)}$ [\SI{}{\kilo\Hz}] & $k$ & $f^\text{(exp)}$ [\SI{}{\kilo\Hz}] & $\vert T \vert$\ \\
+ & & & $(\pm 3\%)$ &   \\ 
 \hline		
-1 		&	0.457		& 	41		&	0.455	\\
-3		&	1.37		& 	123		&	1.36	\\
-5		&	2.29		& 	205		&	2.27	\\
-7		&	3.20		& 	287		&	3.18	\\
-9 		&	4.11		& 	369		&	4.09	\\
+1 		&	0.457	& 	41		&	0.455 	& 	$242.8\times10^3$	\\
+3		&	1.37		& 	123		&	1.36		& 	$79.8\times10^3$\\
+5		&	2.29		& 	205		&	2.27		& 	$46.5\times10^3$\\
+7		&	3.20		& 	287		&	3.18		& 	$31.8\times10^3$\\
+9 		&	4.11		& 	369		&	4.09		& 	$23.4\times10^3$\\
+\hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}
+\captionof{table}{Spettro dell'onda quadra filtrata, armoniche $f_n<f_N$}
+\label{tab:armoniche_quadra_filtro}
+\centering
+\begin{tabular}{c|c|c|c|c}
+$2n+1$ & $f^\text{(teo)}$ [\SI{}{\kilo\Hz}] & $k$ & $f^\text{(exp)}$ [\SI{}{\kilo\Hz}] & $\vert T \vert$\ \\
+ & & & $(\pm 3\%)$ &   \\ 
+\hline		
+1 		&	0.457	& 	41		&	0.455 	& 	$228.1\times10^3$	\\
+3		&	1.35		& 	122		&	1.36		& 	$25.9\times10^3$\\
+5		&	2.26		& 	204		&	2.27		& 	$9.48\times10^3$\\
 \hline
 \end{tabular}
 \end{table*}
@@ -341,6 +359,7 @@ $2n+1$ & $f^\text{(teo)}$ [\SI{}{\kilo\Hz}] & $k$ & $f^\text{(exp)}$ [\SI{}{\kil
 (opamp.+) to[R=$R_A$] ++(-2,0) node[circ] {} node[left]{$V_A$}
 (opamp.+) node[circ] {}
 (opamp.+) to[short] ++(0,-1) to[R=$R_B$] ++(-2,0) node[circ] {} node[left]{$V_B$}
+(opamp.+) to[short] ++(0,-2) to[R=$R_C$] ++(-2,0) node[circ] {} node[left]{$V_C$}
 ;\end{circuitikz}
 \end{center}
 
@@ -349,16 +368,71 @@ $2n+1$ & $f^\text{(teo)}$ [\SI{}{\kilo\Hz}] & $k$ & $f^\text{(exp)}$ [\SI{}{\kil
 %             SEGNALE IMPULSIVO
 %==================================================
 \section{Studio di un segnale impulsivo}
-C = \SI{101.40 \pm 0.05}{nF}
-R = \SI{99.8 \pm 0.5}{\kilo\ohm}
-Segnale impulsivo da Arduino, durata \SI{2.24}{ms} e ampiezza da $0$ a \SI{3.80}{V}
+Si genera un segnale impulsivo prelevando la tensione in un circuito RC ai capi di un condensatore parzialmente caricato con un semiperiodo di un'onda quadra prodotto da Arduino: l'onda quadra, riportata in Figura \ref{fig:impulsoOsc} e in Figura \ref{fig:impulso}, ha una durata di $t = \SI{2.24 \pm 0.07}{\milli\second}$ ed un'ampiezza di $\SI{3.80 \pm 0.1}{\volt}$, valori misurati con l'oscilloscopio.
+I valori nominali dei componenti del circuito RC, misurati con multimetro e ponte, sono $R = \SI{99.8 \pm 0.5}{\kilo\ohm}$ e $C = \SI{101.40 \pm 0.05}{nF}$. Si riesce in questo modo ad ottenere un impulso come quello riportato in Figura \ref{fig:impulsoRC}.
 
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=0.8\linewidth]{impulsoOsc}
+	\captionof{figure}{Istantanea dell'oscilloscopio dell'onda quadra prodotta da Arduino per ottenere un segnale impulsivo}
+	\label{fig:impulsoOsc}
+	\end{center}
+\end{Figure}
 
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=\linewidth]{impulso}
+	\captionof{figure}{Semiperiodo di un'onda quadra prodotta da Arduino e sua trasformata di Fourier}
+	\label{fig:impulso}
+	\end{center}
+\end{Figure}
 
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=\linewidth]{impulsoRC}
+	\captionof{figure}{Impulso generato con un circuito RC e un Arduino, e sua trasformata di Fourier}
+	\label{fig:impulsoRC}
+	\end{center}
+\end{Figure}
+
+Si nota che l'ampiezza dell'impulso è circa cinque volte più piccola di quella prodotta dall'Arduino, ciò è dovuto al fatto che l'onda quadra non ha durata sufficiente per caricare completamente il condensatore, inoltre l'impulso si discosta dal caso ideale a causa di un tempo di scarica non trascurabile: entrambi questi inconvenienti potrebbero essere ridotti scegliendo un condensatore di capacità inferiore\footnote{Ma non troppo piccola per evitare di caricarlo completamente prima del termine del segnale.}.
 
 \subsection{Impulso in assenza di rumore}
-\subsection{Impulso in presenza di rumore}
+Il segnale impulsivo si mette in ingresso al sommatore discusso in precedenza, collegando gli altri due ingressi a massa: si ottiene il segnale riportato in Figura \ref{fig:impulsoRCSommatore}.
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=\linewidth]{impulsoRCSommatore}
+	\captionof{figure}{Uscita del sommatore con il segnale impulsivo in ingresso}
+	\label{fig:impulsoRCSommatore}
+	\end{center}
+\end{Figure}
+Si osserva una distorsione del segnale e un'attenuazione della sua ampiezza. Filtrando l'uscita del sommatore con il filtro VCVS si ottiene il segnale in Figura \ref{fig:impulsoRCSommatoreFiltro}, si osserva che la forma del segnale rimane invariata e che subisce un'amplificazione, coerente con quanto descritto in precedenza.
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=\linewidth]{impulsoRCSommatoreFiltro.png}
+	\captionof{figure}{Uscita del sommatore con il segnale impulsivo in ingresso filtrata dal VCVS}
+	\label{fig:impulsoRCSommatoreFiltro}
+	\end{center}
+\end{Figure}
 
+\subsection{Impulso in presenza di rumore}
+Utilizzando il circuito sommatore, all'impulso viene aggiunto il rumore artificiale generato come descritto precedentemente, si ottiene il segnale riportato in Figura \ref{fig:impulsoRCRumore} dove il picco è appena distinguibile a causa del fatto che la sua ampiezza è confrontabile con quella del rumore, si può comunque individuare il picco della trasformata che caratterizza l'impulso e un fondo circa uniforme che caratterizza il rumore bianco.
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=\linewidth]{impulsoRCRumore}
+	\captionof{figure}{Segnale impulsivo con rumore bianco}
+	\label{fig:impulsoRCRumore}
+	\end{center}
+\end{Figure}
+
+Filtrando l'uscita del sommatore con un VCVS, tutte le componenti ad alta frequenza vengono attutite e si riesce a \emph{ripulire} notevolmente il segnale impulsivo, come mostrato in Figura \ref{fig:impulsoRCRumoreFiltro}.
+\begin{Figure}
+	\begin{center}
+	\includegraphics[width=\linewidth]{impulsoRCRumoreFiltro}
+	\captionof{figure}{Segnale impulsivo con rumore bianco, filtrato}
+	\label{fig:impulsoRCRumoreFiltro}
+	\end{center}
+\end{Figure}
 
 \end{multicols}
 \newpage
