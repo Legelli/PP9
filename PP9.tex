@@ -119,12 +119,49 @@ Si utilizza il microcontrollore Arduino come hardware per il campionamento di se
 %             APPARATO STRUMENTALE
 %==================================================
 \section{Apparato strumentale}
-Si vuole campionare il segnale analogico in ingresso utilizzando la più alta frequenza possibile: le misure vengono dunque memorizzate da Arduino in un buffer nella memoria e solo alla fine vengono trasmesse in seriale, in tal modo si riduce il tempo per effettuare la singola misura\footnote{La trasmissione seriale impiega un tempo non trascurabile per essere completata.}, riducendolo approssimativamente a quello necessario per completare la funzione \texttt{analogRead()}, pari a circa $t_\text{A} = \SI{111}{\micro\second}$, la massima frequenza di campionamento è dunque $f_\text{max} = t_\text{A}^{-1} = \SI{9.0}{\kilo\hertz}$. Considerando la memoria dell'Arduino possono essere memorizzati fino a $N = 800$ valori, dunque campionando alla frequenza massima la durata del campionamento è di circa $t_\text{camp} = N/f_\text{max} = \SI{8.89}{\milli\second}$.
+Si vuole campionare il segnale analogico in ingresso utilizzando la più alta frequenza possibile: le misure vengono dunque memorizzate da Arduino in un buffer nella memoria e solo alla fine vengono trasmesse in seriale, in tal modo si riduce il tempo per effettuare la singola misura\footnote{La trasmissione seriale impiega un tempo non trascurabile per essere completata.}, riducendolo approssimativamente a quello necessario per completare la funzione \texttt{analogRead()}, pari a circa $t_\text{A} = \SI{111}{\micro\second}$, la massima frequenza di campionamento è dunque $f_\text{max} = t_\text{A}^{-1} = \SI{9.0}{\kilo\hertz}$. Considerando la memoria dell'Arduino possono essere memorizzati fino a $N = 800$ valori, dunque campionando alla frequenza massima la durata del campionamento è di circa $t_\text{camp} = N/f_\text{max} = \SI{88.9}{\milli\second}$.
 
-Per evitare fenomeni di \emph{aliasing}, deve essere verificata la seguente condizione sulla frequenza del segnale in ingresso
+Per evitare fenomeni di \emph{aliasing}, deve essere verificata la seguente condizione sulla frequenza del segnale in ingresso, dove $f_N$ è la frequenza di Nyquist:
 \begin{equation}\label{eq:Nyquist}
-	f_\text{in} \leq \frac{f_\text{max}}{2} = \SI{4.5}{\kilo\hertz} \equiv f_\text{Nyquist}.
+	f_\text{in} \leq \frac{f_\text{max}}{2} = \SI{4.5}{\kilo\hertz} \equiv f_N.
 \end{equation}
+
+\subsection{Verifiche di funzionamento}
+Si verifica il funzionamento del programma e si misura la frequenza di campionamento dell'ADC connettendo il pin analogico \texttt{A3} di Arduino al generatore di segnali, dal quale si invia un'onda quadra di frequenza $f_Q = \SI{111 \pm 111}{\Hz}$ e ampiezza compresa tra \SI{0}{} e \SI{111 \pm 111}{V}; si ha cura inoltre di connettere il \texttt{GND} di Arduino alla massa della breadbord. Si connette inoltre il segnale generato al canale \texttt{CH1} dell'oscilloscopio.
+
+Mediante i cursori dell'oscilloscopio si misura il semiperiodo dell'onda quadra (si veda l'istantanea di Figura~\ref{fig:verifiche_osc}), che risulta essere $T_h = \SI{111 \pm 111}{ms}$; quindi lo si confronta con l'acquisizione dell'ADC realizzata mediante \emph{Processing} e riportata in Figura~\ref{fig:verifiche_ADC}, da cui si ricava che ognuno degli $N=800$ campioni è distanziato dal precedente e dal successivo di un intervallo temporale
+\[
+\Delta t = \frac{T_h}{N_h} = \SI{111 \pm 111}{ms},
+\]
+dove $N_h$ è il numero di campioni compresi tra l'inizio e la fine del semiperiodo dell'onda quadra acquisita dall'ADC. La frequenza dell'onda quadra è stata scelta appositamente al fine di estendere il semiperiodo al maggior numero di punti campionati possibile, in modo da diminuire l'incertezza sulla stima precedente. Si ricava quindi la frequenza reale di acquisizione di Arduino come
+\[
+f_s = \frac{1}{\Delta t} = \SI{111 \pm 111}{\Hz},
+\]
+compatibile con quanto descritto precedentemente. Si ha poi la frequenza di Nyquist
+\[
+f_N = \frac{f_s}{2} = \SI{111 \pm 111}{\Hz},
+\]
+e si ricava l'intervallo tra due campioni successivi di frequenza come
+\begin{equation}\label{eq:ktof}
+\Delta f = \frac{f_s}{N} = \SI{111 \pm 111}{\Hz}.
+\end{equation}
+Da queste misure si conclude che la frequenza in funzione del numero $k$ riportato in ascissa sul grafico del modulo della trasformata è $f = k \Delta f$, e che l'intervallo di frequenze osservabili sperimentalmente è $[\Delta f, f_N] = [\SI{111}{\Hz}, \SI{111}{\Hz}]$. Dal grafico della trasformata si osserva, oltre al picco relativo alla frequenza $f_Q$, il simmetrico a frequenza $2f_N - f_Q$, che rappresenta la frequenza negativa dovuta alla periodicità della trasformata di Fourier discreta.
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Onda quadra visualizzata sull'oscilloscopio}
+%	\label{fig:verifiche_osc}
+%	\end{center}
+%\end{Figure}
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Onda quadra campionata da Arduino con il programma \emph{Processing}}
+%	\label{fig:verifiche_ADC}
+%	\end{center}
+%\end{Figure}
 
 
 %==================================================
@@ -133,71 +170,86 @@ Per evitare fenomeni di \emph{aliasing}, deve essere verificata la seguente cond
 \section{Segnale analogico in assenza di rumore}
 Si campionano e si studiano in frequenza dei segnali analogici prodotti dal generatore di funzioni in assenza di rumore artificiale.
 \subsection{Segnale sinusoidale}
-Si campiona digitalmente un segnale sinusoidale analogico in ingresso a frequenze $f_1 = \SI{111 \pm 111}{\hertz}, \; f_2 = \SI{111 \pm 111}{\kilo\hertz}$ e infine $f_3 = \SI{111 \pm 111}{\kilo\hertz}$, quest'ultima volutamente superiore al limite dettato dalla frequenza di Nyquist (\ref{eq:Nyquist}) per poter apprezzare i fenomeni di \emph{aliasing}; le frequenze sono misurate con un oscilloscopio.
+Si campiona digitalmente un segnale sinusoidale analogico in ingresso a frequenze $f_1 = \SI{111 \pm 111}{\hertz}, \; f_2 = \SI{111 \pm 111}{\kilo\hertz}$ e infine $f_3 = \SI{111 \pm 111}{\kilo\hertz}$, quest'ultima volutamente superiore al limite dettato dalla frequenza di Nyquist (\ref{eq:Nyquist}) per poter apprezzare i fenomeni di \emph{aliasing}; le frequenze sono misurate con l'oscilloscopio, collegando direttamente il segnale dal generatore di funzioni al canale \texttt{CH1} dello strumento.
 
-Si riportano in Figura \ref{fig:sin200camp} e in Figura \ref{fig:sin200trasf} il segnale a frequenza $f_1$ campionato da Arduino e la sua trasformata di Fourier discreta, rispettivamente. Sull'asse delle ascisse sono riportate le frequenze di Fourier tenendo presente la relazione che lega la frequenza con l'indice della trasformata
-\begin{equation}\label{eq:frequenzeFourier}
-	f_\text{fourier} = k \frac{f_\text{s}}{N}
-\end{equation}
-essendo $f_\text{s}/N$ l'inverso della finestra temporale del campionamento, e dunque la minima frequenza misurabile: le altre frequenze della decomposizione saranno multipli interi della frequenza elementare.
-Nel grafico della trasformata viene inoltre riportata indicativamente la frequenza di Nyquist.
+Si riportano in Figura \ref{fig:sin200} e in Figura \ref{fig:sin200osc} il segnale a frequenza $f_1$ campionato da Arduino con la sua trasformata di Fourier discreta e l'istantanea dell'oscilloscopio per questa configurazione, rispettivamente. Sull'asse delle ascisse del grafico della trasformata sono riportate le frequenze di Fourier tenendo presente la relazione~(\ref{eq:ktof}) che lega la frequenza all'indice $k$.
+
+%Nel grafico della trasformata viene inoltre riportata indicativamente la frequenza di Nyquist.COME?
 
 %\begin{Figure}
 %	\begin{center}
-%	\includegraphics[width=\linewidth]{sin200camp.pdf}
-%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}, campionato con Arduino.}
-%	\label{fig:sin200camp}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f_1$ e sua trasformata di Fourier realizzata con Arduino}
+%	\label{fig:sin200}
 %	\end{center}
 %\end{Figure}
 %
 %\begin{Figure}
 %	\begin{center}
-%	\includegraphics[width=\linewidth]{sin200trasf.pdf}
-%	\captionof{figure}{Trasformata di Fourier discreta di un segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}.}
-%	\label{fig:sin200trasf}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Istantanea dell'oscilloscopio per il segnale sinusoidale a frequenza $f_1$}
+%	\label{fig:sin200osc}
 %	\end{center}
 %\end{Figure}
 
-Come da aspettativa teorica, la trasformata ha un picco in corrispondenza della frequenza del segnale in ingresso, essendo questo sinusoidale ed essendo lontani dalla frequenza di Nyquist.
+Come da previsione teorica, la trasformata ha un picco in corrispondenza di $k=111$, dunque ad una frequenza $f_1^\text{(exp)} = \SI{111}{\Hz}$, compatibile con la frequenza $f_1$ del segnale in ingresso, essendo questo sinusoidale ed essendo lontani dalla frequenza di Nyquist; inoltre, è visibile anche in questo caso il picco simmetrico a $2f_N - f_1^\text{(exp)}$.
 
-Analogamente, si riportano in Figura \ref{fig:sin42camp}, \ref{fig:sin42trasf}, \ref{fig:sin6camp} e \ref{fig:sin6trasf} i grafici ottenuti campionando due segnali di frequenza $f_2$ e $f_3$. L'ultimo è a frequenza superiore a quella di Nyquist, la frequenza apparente è coerente con quanto previsto teoricamente, ovvero
-\begin{equation}\label{eq:frequenzaAlias}
-	f_\text{alias} = 2f_\text{Nyquist} - f_\text{in}.
-\end{equation}
+Si ripete dunque il campionamento per il segnale sinusoidale a frequenza $f_2$, prossima alla frequenza di Nyquist, e si riportano in Figura \ref{fig:sin42}, \ref{fig:sin42osc} i grafici della tensione in funzione del tempo e della trasformata di Fourier e uno screenshot dell'oscilloscopio. In questo caso, nel grafico dell'acquisizione con l'ADC, sono visibili i battimenti, dovuti alla frequenza molto prossima del segnale campionato e del suo simmetrico con frequenza negativa\footnote{Si ricorda che, poiché il segnale è reale, devono apparire sia la sua frequenza $f$ sia $-f$ per dar conto dell'assenza della parte immaginaria del segnale ricostruito a partire dalla trasformata.}. Dal grafico della trasformata si individua un picco in corrispondenza di $k = 111$, ossia della frequenza $f_2^\text{(exp)} = \SI{111}{\Hz}$, compatibile con quella del segnale in ingresso $f_2$.
 
 %\begin{Figure}
 %	\begin{center}
-%	\includegraphics[width=\linewidth]{sin42camp.pdf}
-%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}, campionato con Arduino.}
-%	\label{fig:sin42camp}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f_2$ e sua trasformata di Fourier realizzata con Arduino}
+%	\label{fig:sin42}
 %	\end{center}
 %\end{Figure}
 %
 %\begin{Figure}
 %	\begin{center}
-%	\includegraphics[width=\linewidth]{sin42rasf.pdf}
-%	\captionof{figure}{Trasformata di Fourier discreta di un segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}.}
-%	\label{fig:sin42trasf}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Istantanea dell'oscilloscopio per il segnale sinusoidale a frequenza $f_2$}
+%	\label{fig:sin42osc}
+%	\end{center}
+%\end{Figure}
+
+Infine si campiona il segnale sinusoidale a frequenza $f_3 > f_N$, per il quale si prevede di osservare il fenomeno dell'\emph{aliasing}, come previsto dal Teorema di Nyquist-Shannon. Si riportano in Figura~\ref{fig:sin6} e \ref{fig:sin6osc} il grafico della tensione campionata e della sua trasformata di Fourier e un'istantanea dell'oscilloscopio. Si individua il picco della trasformata in corrispondenza di $k = 111$, ossia alla frequenza $f_3^\text{(alias)} = \SI{111}{\Hz}$, che è diversa da quella del segnale $f_3$ misurata dall'oscilloscopio. La frequenza compatibile con quest'ultima è però la simmetrica rispetto a $f_N$, ossia $f_3^\text{(exp)} = \SI{111}{\Hz}$, che è collocata proprio in $2f_N-f_3^\text{(alias)}$.
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f_3$ e sua trasformata di Fourier realizzata con Arduino}
+%	\label{fig:sin6}
 %	\end{center}
 %\end{Figure}
 %
 %\begin{Figure}
 %	\begin{center}
-%	\includegraphics[width=\linewidth]{sin6camp.pdf}
-%	\captionof{figure}{Segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}, campionato con Arduino.}
-%	\label{fig:sin6camp}
+%	\includegraphics[width=\linewidth]{}
+%	\captionof{figure}{Istantanea dell'oscilloscopio per il segnale sinusoidale a frequenza $f_3$}
+%	\label{fig:sin6osc}
 %	\end{center}
 %\end{Figure}
-%
-%\begin{Figure}
-%	\begin{center}
-%	\includegraphics[width=\linewidth]{sin6trasf.pdf}
-%	\captionof{figure}{Trasformata di Fourier discreta di un segnale sinusoidale analogico a frequenza $f=\SI{111 \pm 111}{\hertz}.}
-%	\label{fig:sin6trasf}
-%	\end{center}
-%\end{Figure}
+
+Data la medesima procedura sperimentale seguita per gli ultimi due segnali sinusoidali, si procede a compiere $6$ misure analoghe, $3$ a frequenza $f<f_N$ e $3$ a frequenza $f>f_N$. I risultati sono riportati in Tabella~\ref{tab:misure_sin}.
+
+\begin{center}
+\captionof{table}{Campionamento di segnali sinusoidali a $f<f_N$ e $f>f_N$}
+\label{tab:misure_sin}
+\begin{tabular}{c|c|c|c|c}
+$f$ [\SI{}{Hz}] & $k$ & $f^\text{(exp)}$ [\SI{}{Hz}] & $k_\text{alias}$ & $f^\text{(alias)}$ [\SI{}{Hz}] \\
+\hline
+\hline
+\end{tabular}
+\end{center}
+
+Si osserva che la frequenza del segnale è compatibile con $f^\text{(exp)}$ per i segnali a $f<f_N$, e con $f^\text{(alias)}$ per quelli a $f>f_N$.
+
 
 \subsection{Onda quadra}
+
+
+
+
 
 %==================================================
 %             STUDIO DEL RUMORE
