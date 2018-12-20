@@ -373,7 +373,11 @@ In Figura \ref{fig:rumore} è riportato il campionamento digitale del rumore e l
 	\end{center}
 \end{Figure}
 
-Essendo il rumore di natura aleatoria, lo studio in frequenza viene fatto su un campione di 5 misure. Si riporta in Figura \ref{fig:studioRumore} la distribuzione media\footnote{Calcolata come radice della media dei quadrati.} dei moduli della trasformata di Fourier per le diverse frequenze dello sviluppo: si vede un andamento circa uniforme delle medie, in accordo con la definizione di rumore bianco. È inoltre ben distinguibile la frequenza parassita che, per quanto sia diminuita in intensità rispetto alla prima misura fatta, rimane comunque presente.
+Essendo il rumore di natura aleatoria, lo studio in frequenza viene fatto su un campione di 5 misure. Si riporta in Figura \ref{fig:studioRumore} la distribuzione dei valori quadratici medi dei moduli della trasformata di Fourier per le diverse frequenze dello sviluppo, ossia
+\[
+S(k) = \sqrt{\frac{\sum_{m=1}^5\abs{X_m(k)}^2}{M}} 
+\]
+Si vede un andamento circa uniforme delle medie, in accordo con la definizione di rumore bianco. È inoltre ben distinguibile la frequenza parassita che, per quanto sia diminuita in intensità rispetto alla prima misura fatta, rimane comunque presente.
 \begin{Figure}
 	\begin{center}
 	\includegraphics[width=\linewidth]{studioRumore}
@@ -382,7 +386,7 @@ Essendo il rumore di natura aleatoria, lo studio in frequenza viene fatto su un 
 	\end{center}
 \end{Figure}
 
-Si collega dunque l'uscita del sommatore al filtro VCVS passa basso discusso in precedenza e si ripete l'analisi in frequenza. Si riporta in Figura \ref{fig:rumoreFiltroOsc} un'istantanea dell'oscilloscopio del rumore filtrato, è evidente l'attenuazione dovuta all'abbattimento delle frequenze più elevate. L'analisi più dettagliata è riportata in Figura \ref{fig:rumoreFiltro} mentre la media su cinque campioni è proposta in Figura \ref{fig:studioRumoreFiltro}: in quest'ultima è ben visibile l'effetto del filtro passa basso sulle componenti del rumore.
+Si collega dunque l'uscita del sommatore al filtro VCVS passa basso discusso in precedenza e si ripete l'analisi in frequenza. Si riporta in Figura \ref{fig:rumoreFiltroOsc} un'istantanea dell'oscilloscopio del rumore filtrato, è evidente l'attenuazione dovuta all'abbattimento delle frequenze più elevate. L'analisi più dettagliata è riportata in Figura \ref{fig:rumoreFiltro} mentre la media su cinque campioni è proposta in Figura \ref{fig:studioRumoreFiltro}: in quest'ultima è ben visibile l'effetto del filtro passa basso sulle componenti del rumore, consistente in un picco attorno alla frequenza di taglio del filtro e un andamento decrescente fino alla frequenza di Nyquist. 
 \begin{Figure}
 	\begin{center}
 	\includegraphics[width=0.8\linewidth]{rumoreFIltroOsc}
@@ -390,6 +394,9 @@ Si collega dunque l'uscita del sommatore al filtro VCVS passa basso discusso in 
 	\label{fig:rumoreFiltroOsc}
 	\end{center}
 \end{Figure}
+
+È altresì visibile come il valore di $S$ sia inferiore di un ordine di grandezza rispetto al caso non filtrato, conseguenza dell'eliminazione da parte del filtro delle alte frequenze, responsabili dell'\emph{aliasing}. Tuttavia è bene ricordare che non si possa fare un confronto diretto tra i valori, dal momento che il filtro, come già evidenziato in precedenza, ha un guadagno non trascurabile.
+
 \begin{Figure}
 	\begin{center}
 	\includegraphics[width=\linewidth]{rumoreFiltro}
@@ -400,7 +407,7 @@ Si collega dunque l'uscita del sommatore al filtro VCVS passa basso discusso in 
 \begin{Figure}
 	\begin{center}
 	\includegraphics[width=\linewidth]{studioRumoreFiltrato}
-	\captionof{figure}{Distribuzione media delle armoniche di cinque campioni di rumore, è evidente l'effetto del filtro sulle componenti}
+	\captionof{figure}{Distribuzione media delle armoniche di cinque campioni di rumore}
 	\label{fig:studioRumoreFiltro}
 	\end{center}
 \end{Figure}
@@ -415,15 +422,15 @@ I valori nominali dei componenti del circuito RC, misurati con multimetro e pont
 
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=0.8\linewidth]{impulsoOsc}
-	\captionof{figure}{Istantanea dell'oscilloscopio dell'onda quadra prodotta da Arduino per ottenere un segnale impulsivo}
+	\includegraphics[width=0.7\linewidth]{impulsoOsc}
+	\captionof{figure}{Istantanea dell'oscilloscopio dell'onda quadra prodotta da Arduino}
 	\label{fig:impulsoOsc}
 	\end{center}
 \end{Figure}
 
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{impulso}
+	\includegraphics[width=0.9\linewidth]{impulso}
 	\captionof{figure}{Semiperiodo di un'onda quadra prodotta da Arduino e sua trasformata di Fourier}
 	\label{fig:impulso}
 	\end{center}
@@ -431,8 +438,8 @@ I valori nominali dei componenti del circuito RC, misurati con multimetro e pont
 
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{impulsoRC}
-	\captionof{figure}{Impulso generato con un circuito RC e un Arduino, e sua trasformata di Fourier}
+	\includegraphics[width=0.9\linewidth]{impulsoRC}
+	\captionof{figure}{Impulso generato con un circuito RC e un Arduino e sua trasformata di Fourier}
 	\label{fig:impulsoRC}
 	\end{center}
 \end{Figure}
@@ -443,7 +450,7 @@ Si nota che l'ampiezza dell'impulso è circa cinque volte più piccola di quella
 Il segnale impulsivo si mette in ingresso ad un sommatore a tre ingressi, collegando gli altri due ingressi a massa: si ottiene il segnale riportato in Figura \ref{fig:impulsoRCSommatore}.
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{impulsoRCSommatore}
+	\includegraphics[width=0.9\linewidth]{impulsoRCSommatore}
 	\captionof{figure}{Uscita del sommatore con il segnale impulsivo in ingresso}
 	\label{fig:impulsoRCSommatore}
 	\end{center}
@@ -451,17 +458,17 @@ Il segnale impulsivo si mette in ingresso ad un sommatore a tre ingressi, colleg
 Si osserva una distorsione del segnale e un'attenuazione della sua ampiezza. Filtrando l'uscita del sommatore con il filtro VCVS si ottiene il segnale in Figura \ref{fig:impulsoRCSommatoreFiltro}, si osserva che la forma del segnale rimane invariata e che subisce un'amplificazione, coerente con quanto descritto in precedenza.
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{impulsoRCSommatoreFiltro.png}
+	\includegraphics[width=0.9\linewidth]{impulsoRCSommatoreFiltro.png}
 	\captionof{figure}{Uscita del sommatore con il segnale impulsivo in ingresso filtrata dal VCVS}
 	\label{fig:impulsoRCSommatoreFiltro}
 	\end{center}
 \end{Figure}
 
 \subsection{Impulso in presenza di rumore}
-Utilizzando il circuito sommatore, all'impulso viene aggiunto il rumore artificiale generato come descritto precedentemente, si ottiene il segnale riportato in Figura \ref{fig:impulsoRCRumore} dove il picco è appena distinguibile a causa del fatto che la sua ampiezza è confrontabile con quella del rumore, si può comunque individuare il picco della trasformata che caratterizza l'impulso e un fondo circa uniforme che caratterizza il rumore bianco.
+Utilizzando il circuito sommatore, all'impulso viene aggiunto il rumore artificiale generato come descritto precedentemente. Si ottiene il segnale riportato in Figura \ref{fig:impulsoRCRumore}, dove il picco è appena distinguibile a causa del fatto che la sua ampiezza è confrontabile con quella del rumore; si può comunque individuare il picco della trasformata che caratterizza l'impulso, e un fondo circa uniforme che caratterizza il rumore bianco.
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{impulsoRCRumore}
+	\includegraphics[width=0.9\linewidth]{impulsoRCRumore}
 	\captionof{figure}{Segnale impulsivo con rumore bianco}
 	\label{fig:impulsoRCRumore}
 	\end{center}
@@ -470,7 +477,7 @@ Utilizzando il circuito sommatore, all'impulso viene aggiunto il rumore artifici
 Filtrando l'uscita del sommatore con un VCVS, tutte le componenti ad alta frequenza vengono attutite e si riesce a \emph{ripulire} notevolmente il segnale impulsivo, come mostrato in Figura \ref{fig:impulsoRCRumoreFiltro}.
 \begin{Figure}
 	\begin{center}
-	\includegraphics[width=\linewidth]{impulsoRCRumoreFiltro}
+	\includegraphics[width=0.9\linewidth]{impulsoRCRumoreFiltro}
 	\captionof{figure}{Segnale impulsivo con rumore bianco, filtrato}
 	\label{fig:impulsoRCRumoreFiltro}
 	\end{center}
